@@ -11,7 +11,7 @@ const Joi = require('joi');
 
 const router = express.Router();
 
-const contactValidSchema = Joi.when(Joi.ref('$requestMethod'), {
+const contactBodyValidSchema = Joi.when(Joi.ref('$requestMethod'), {
   switch: [
     {
       is: 'POST',
@@ -83,7 +83,7 @@ router.get('/:contactId', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    const { error } = contactValidSchema.validate(req.body);
+    const { error } = contactBodyValidSchema.validate(req.body);
     if (error) {
       throw HttpError(400, error.message);
     }
@@ -110,7 +110,7 @@ router.delete('/:contactId', async (req, res, next) => {
 router.put('/:contactId', async (req, res, next) => {
   try {
     const updates = req.body;
-    const { error } = contactValidSchema.validate(updates);
+    const { error } = contactBodyValidSchema.validate(updates);
     if (error) {
       throw HttpError(400, error.message);
     }
