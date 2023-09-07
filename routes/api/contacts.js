@@ -1,23 +1,65 @@
-const express = require("express");
+const express = require('express');
 const {
   listContacts,
   getContactById,
   removeContact,
   addContact,
   updateContact,
-} = require("../../models/contacts");
-const { HttpError } = require("../../utils");
-const Joi = require("joi");
+} = require('../../models/contacts');
+const { HttpError } = require('../../utils');
+const Joi = require('joi');
 
 const router = express.Router();
 
-const addSchema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().required(),
-  phone: Joi.string().required(),
+const contactValidSchema = Joi.when(Joi.ref('$requestMethod'), {
+  switch: [
+    {
+      is: 'POST',
+      then: Joi.object({
+        name: Joi.string().empty('').trim().min(3).max(30).required().messages({
+          'string.min': `name should have a minimum length of {#limit}`,
+          'string.max': `name should have a maximum length of {#limit}`,
+          'any.required': `missing required name field`,
+        }),
+        email: Joi.string().empty('').trim().min(6).max(30).email().required().messages({
+          'string.min': `email should have a minimum length of {#limit}`,
+          'string.max': `email should have a maximum length of {#limit}`,
+          'string.email': `email field must be a valid`,
+          'any.required': `missing required email field`,
+        }),
+        phone: Joi.string()
+          .trim()
+          .empty('')
+          .trim()
+          .min(6)
+          .max(30)
+          .pattern(/^[+]?\d{2,7}[(\- .\s]?\d{2,7}([)\- .\s]?\d{2,7})*$/)
+          .required()
+          .messages({
+            'string.min': `phone should have a minimum length of {#limit}`,
+            'string.max': `phone should have a maximum length of {#limit}`,
+            'any.required': `missing required phone field`,
+          }),
+      }),
+    },
+    {
+      is: 'PUT',
+      then: Joi.object({
+        name: Joi.string().empty('').trim().min(3).max(30),
+        email: Joi.string().empty('').trim().min(6).max(30).email(),
+        phone: Joi.string()
+          .trim()
+          .empty('')
+          .trim()
+          .min(6)
+          .max(30)
+          .pattern(/^[+]?\d{2,7}[(\- .\s]?\d{2,7}([)\- .\s]?\d{2,7})*$/),
+      }),
+    },
+  ],
 });
 
-router.get("/", async (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     const contacts = await listContacts();
     res.status(200).json(contacts);
@@ -26,12 +68,12 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/:contactId", async (req, res, next) => {
+router.get('/:contactId', async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const contact = await getContactById(contactId);
     if (!contact) {
-      throw HttpError(404, "Not found");
+      throw HttpError(404, 'Not found');
     }
     return res.status(200).json(contact);
   } catch (error) {
@@ -39,21 +81,12 @@ router.get("/:contactId", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
-    const { error } = addSchema.validate(req.body);
+    const { error } = contactValidSchema.validate(req.body);
     if (error) {
       throw HttpError(400, error.message);
     }
-
-    // const { name, email, phone } = req.body;
-
-    // if (!name || !email || !phone) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "missing required name field" });
-    // }
-
     const contacts = await addContact(req.body);
     return res.status(201).json(contacts);
   } catch (error) {
@@ -61,36 +94,32 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.delete("/:contactId", async (req, res, next) => {
+router.delete('/:contactId', async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const contact = await removeContact(contactId);
     if (!contact) {
-      throw HttpError(404, "Not found");
+      throw HttpError(404, 'Not found');
     }
-    res.status(200).json({ message: "contact deleted" });
+    res.status(200).json({ message: 'contact deleted' });
   } catch (error) {
     next(error);
   }
 });
 
-router.put("/:contactId", async (req, res, next) => {
+router.put('/:contactId', async (req, res, next) => {
   try {
-    const { contactId } = req.params;
-    const { error } = addSchema.validate(req.body);
+    const updates = req.body;
+    const { error } = contactValidSchema.validate(updates);
     if (error) {
       throw HttpError(400, error.message);
     }
-    //  const { name, email, phone } = req.body;
-    //  if (!name && !email && !phone) {
-    //    return res.status(400).json({ message: "missing fields" });
-    //  }
 
-    const updates = req.body;
+    const { contactId } = req.params;
+
     const contact = await updateContact(contactId, updates);
     if (!contact) {
-      throw HttpError(404, "Contact not found");
-      // return res.status(404).json({ message: "Contact not found" });
+      throw HttpError(404, 'Contact not found');
     }
     res.status(200).json(contact);
   } catch (error) {
