@@ -1,10 +1,7 @@
 const app = require("./app");
-
+const { DB_HOST } = require("./config");
 const mongoose = require("mongoose");
 
-const user = "yfn";
-const password = "nenDQx8b8N2rnrLO";
-const DB_HOST = `mongodb+srv://${user}:${password}@cluster0.yc88dmg.mongodb.net/notebook`;
 mongoose
   .connect(DB_HOST)
   .then(() => {
