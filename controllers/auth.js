@@ -60,8 +60,15 @@ const current = async (req, res, next) => {
   });
 };
 
+const logout = async (req, res, next) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { token: null });
+  res.status(204).json({ message: "No Content" });
+};
+
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
   current: ctrlWrapper(current),
+  logout: ctrlWrapper(logout),
 };
