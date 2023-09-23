@@ -7,17 +7,11 @@ const contactSchema = Joi.when(Joi.ref("$requestMethod"), {
     {
       is: "POST",
       then: Joi.object({
-        name: Joi.string()
-          .empty("")
-          .trim()
-          .min(3)
-          .max(30)
-          .required()
-          .messages({
-            "string.min": `name should have a minimum length of {#limit}`,
-            "string.max": `name should have a maximum length of {#limit}`,
-            "any.required": `missing required name field`,
-          }),
+        name: Joi.string().empty("").trim().min(3).max(30).required().messages({
+          "string.min": `name should have a minimum length of {#limit}`,
+          "string.max": `name should have a maximum length of {#limit}`,
+          "any.required": `missing required name field`,
+        }),
         email: Joi.string()
           .empty("")
           .trim()
@@ -37,9 +31,7 @@ const contactSchema = Joi.when(Joi.ref("$requestMethod"), {
           .trim()
           .min(6)
           .max(30)
-          .pattern(
-            /^[+]?\d{2,7}[(\- .\s]?\d{2,7}([)\- .\s]?\d{2,7})*$/
-          )
+          .pattern(/^[+]?\d{2,7}[(\- .\s]?\d{2,7}([)\- .\s]?\d{2,7})*$/)
           .required()
           .messages({
             "string.min": `phone should have a minimum length of {#limit}`,
@@ -60,9 +52,7 @@ const contactSchema = Joi.when(Joi.ref("$requestMethod"), {
           .trim()
           .min(6)
           .max(30)
-          .pattern(
-            /^[+]?\d{2,7}[(\- .\s]?\d{2,7}([)\- .\s]?\d{2,7})*$/
-          ),
+          .pattern(/^[+]?\d{2,7}[(\- .\s]?\d{2,7}([)\- .\s]?\d{2,7})*$/),
         favorite: Joi.boolean(),
       }),
     },
@@ -88,6 +78,10 @@ const contactMongooseSchema = new Schema(
     favorite: {
       type: Boolean,
       default: false,
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
     },
   },
   { versionKey: false, timestamps: true }

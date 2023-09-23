@@ -23,10 +23,6 @@ const userSchema = new Schema(
       default: "starter",
     },
     token: String,
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: "user",
-    },
   },
   { versionKey: false, timestamps: true }
 );
