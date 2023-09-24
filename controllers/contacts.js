@@ -7,7 +7,7 @@ const contactList = async (req, res, next) => {
   const skip = (page - 1) * limit;
 
   const contacts = await Contact.find(
-    { owner },
+    { owner, ...req.query },
     "-createdAt -updatedAt",
     {
       skip,
