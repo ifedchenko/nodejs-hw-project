@@ -6,7 +6,7 @@ const { validateBody, authenticate } = require("../../middlewares");
 
 const { schemas } = require("../../models/user");
 
-const ctrl = require("../../controllers/auth");
+const ctrl = require("../../controllers/users");
 
 // signup
 router.post(
