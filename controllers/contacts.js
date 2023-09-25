@@ -26,7 +26,7 @@ const contactGetById = async (req, res, next) => {
     owner,
   });
   if (!contact) {
-    throw HttpError(404, "Not found");
+    throw HttpError(404, "Contact not found");
   }
   return res.status(200).json(contact);
 };
