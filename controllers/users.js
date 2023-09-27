@@ -39,19 +39,23 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
-  if (!user) {
-    throw HttpError(401, "Email or password is wrong");
+  // if (!user) {
+  //   throw HttpError(401, "Email or password is wrong");
+  // }
+
+  // const passwordCompare = await bcrypt.compare(password, user.password);
+
+  // if (!passwordCompare) {
+  //   throw HttpError(401, "Email or password is wrong");
+  // }
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    res.status(401).json({
+      message: "Email or password is wrong",
+    });
+    return;
   }
 
-  const passwordCompare = await bcrypt.compare(password, user.password);
-
-  if (!passwordCompare) {
-    throw HttpError(401, "Email or password is wrong");
-  }
-
-  const payload = {
-    id: user._id,
-  };
+  const payload = { id: user._id };
   const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
 
   user.token = token;
