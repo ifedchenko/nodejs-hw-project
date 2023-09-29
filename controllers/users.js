@@ -4,6 +4,7 @@ const gravatar = require("gravatar");
 const path = require("path");
 const fs = require("fs/promises");
 const Jimp = require("jimp");
+const cloudinary = require("cloudinary");
 
 const { User } = require("../models/user");
 const { HttpError, ctrlWrapper } = require("../utils");
@@ -84,16 +85,43 @@ const logout = async (req, res, next) => {
   res.status(204).json({ message: "No Content" });
 };
 
+// local file saving
+// const updateAvatar = async (req, res, next) => {
+//   const { path: tempUpload, originalname } = req.file;
+//   const filename = `${req.user._id}_${originalname}`;
+//   const resultUpload = path.join(avatarsDir, filename);
+
+//   const avatar = await Jimp.read(tempUpload);
+//   await avatar.resize(250, 250).write(resultUpload);
+
+//   await fs.rename(tempUpload, resultUpload);
+//   const avatarURL = path.join("avatars", filename);
+
+//   await User.findByIdAndUpdate(req.user._id, { avatarURL });
+//   res.status(200).json({
+//     avatarURL,
+//   });
+// };
+
+// cloudinary file saving
+cloudinary.config({
+  cloud_name: "dgjrcmzdx",
+  api_key: "855323662698823",
+  api_secret: "xtU5WHZcO0NgVnEiNCJQpbHaxBY",
+});
+
 const updateAvatar = async (req, res, next) => {
   const { path: tempUpload, originalname } = req.file;
   const filename = `${req.user._id}_${originalname}`;
-  const resultUpload = path.join(avatarsDir, filename);
+  const upload = await cloudinary.v2.uploader.upload(tempUpload, {
+    public_id: filename,
+    transformation: [{ width: 250, height: 250, crop: "fit" }],
+  });
 
-  const avatar = await Jimp.read(tempUpload);
-  await avatar.resize(250, 250).write(resultUpload);
+  const avatarURL = upload.url;
 
-  await fs.rename(tempUpload, resultUpload);
-  const avatarURL = path.join("avatars", filename);
+  await fs.unlink(tempUpload);
+
   await User.findByIdAndUpdate(req.user._id, { avatarURL });
   res.status(200).json({
     avatarURL,
