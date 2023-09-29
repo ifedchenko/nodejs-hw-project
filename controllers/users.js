@@ -10,7 +10,7 @@ const { User } = require("../models/user");
 const { HttpError, ctrlWrapper } = require("../utils");
 
 require("dotenv").config();
-const { SECRET_KEY } = process.env;
+const { SECRET_KEY, SECRET_CLOUD_KEY, SECRET_CLOUD_API_KEY, SECRET_CLOUD_API_SECRET } = process.env;
 const avatarsDir = path.join(__dirname, "../", "public", "avatars");
 
 const register = async (req, res, next) => {
@@ -105,9 +105,9 @@ const logout = async (req, res, next) => {
 
 // cloudinary file saving
 cloudinary.config({
-  cloud_name: "dgjrcmzdx",
-  api_key: "855323662698823",
-  api_secret: "xtU5WHZcO0NgVnEiNCJQpbHaxBY",
+  cloud_name: SECRET_CLOUD_KEY,
+  api_key: SECRET_CLOUD_API_KEY,
+  api_secret: SECRET_CLOUD_API_SECRET,
 });
 
 const updateAvatar = async (req, res, next) => {
