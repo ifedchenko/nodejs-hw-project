@@ -11,7 +11,7 @@ const ctrl = require("../../controllers/users");
 // signup
 router.post("/register", validateBody(schemas.registrationSchema), ctrl.register);
 router.get("/verify/:verificationToken", ctrl.verifyEmail);
-router.post("/verify", validateBody(schemas.emailSchema), ctrl.verifyEmail);
+router.post("/verify", validateBody(schemas.emailSchema), ctrl.resendVerifyEmail);
 
 // signin
 router.post("/login", validateBody(schemas.loginSchema), ctrl.login);
